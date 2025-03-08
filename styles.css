@@ -586,7 +586,7 @@ footer p {
     height: 100vh;
     background-color: white;
     box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
-    z-index: 9999;
+    z-index: 1020;
     transition: right 0.4s ease;
     display: flex;
     flex-direction: column;
@@ -739,18 +739,18 @@ footer p {
     .navbar {
         padding: 0;
         height: 60px;
-        z-index: 9990;
+        z-index: 1015;
     }
     
     .navbar-container {
-        position: relative;
         width: 100%;
         padding: 0 1rem;
-        z-index: inherit;
+        position: relative;
+        z-index: 1015;
     }
     
     .mobile-menu-btn {
-        z-index: inherit;
+        display: block;
     }
     
     .nav-links {
@@ -765,7 +765,7 @@ footer p {
         transition: height 0.3s ease;
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         margin-right: 0;
-        z-index: 9980;
+        z-index: 1010;
     }
     
     .nav-links.active {
@@ -815,11 +815,11 @@ footer p {
     }
     
     .nav-right {
-        position: relative;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        z-index: inherit;
+        position: relative;
+        z-index: 1015;
     }
 }
 
@@ -1256,8 +1256,4 @@ html {
     #what-we-do .expertise-item {
         padding: 1.5rem;
     }
-}
-
-.site-wrapper.news-active::after {
-    z-index: 9998;
 } 
