@@ -586,7 +586,7 @@ footer p {
     height: 100vh;
     background-color: white;
     box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
-    z-index: 1010;
+    z-index: 1020;
     transition: right 0.4s ease;
     display: flex;
     flex-direction: column;
@@ -739,11 +739,14 @@ footer p {
     .navbar {
         padding: 0;
         height: 60px;
+        z-index: 1015;
     }
     
     .navbar-container {
         width: 100%;
         padding: 0 1rem;
+        position: relative;
+        z-index: 1015;
     }
     
     .mobile-menu-btn {
@@ -762,6 +765,7 @@ footer p {
         transition: height 0.3s ease;
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         margin-right: 0;
+        z-index: 1010;
     }
     
     .nav-links.active {
@@ -810,15 +814,12 @@ footer p {
         margin-right: 0;
     }
     
-    /* Add a container for the right-side buttons */
-    .navbar-container {
-        position: relative;
-    }
-    
     .nav-right {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        position: relative;
+        z-index: 1015;
     }
 }
 
