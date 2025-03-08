@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Professional Transactions Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Font for modern typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <style>
+    /* Basic reset and styling */
+    html, body { margin: 0; padding: 0; height: 100%; font-family: 'Roboto', sans-serif; }
+    #map { height: 100vh; width: 100%; }
+    
+    /* Loading overlay */
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .spinner {
+      border: 4px solid #ddd;
+      border-top: 4px solid #008000;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    /* Search button styling */
+    .search-button {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      background: #008000;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .search-button:hover {
+      background: #006700;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+    
+    /* Filter modal styling */
+    .filter-modal {
+      position: fixed;
+      bottom: -100%;
+      left: 30px;
+      background: white;
+      width: 300px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      z-index: 999;
+      padding: 20px;
+      transition: all 0.3s ease;
+      opacity: 0;
+    }
+    
+    .filter-modal.active {
+      bottom: 90px;
+      opacity: 1;
+    }
+    
+    .filter-modal h2 {
+      margin: 0 0 20px;
+      color: #333;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .filter-group {
+      margin-bottom: 15px;
+    }
+    
+    .filter-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #333;
+      background: #f8f8f8;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: #008000;
+      background: white;
+    }
+    
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .filter-actions button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .apply-filters {
+      background: #008000;
+      color: white;
+    }
+    
+    .apply-filters:hover {
+      background: #006700;
+    }
+    
+    .reset-filters {
+      background: #f0f0f0;
+      color: #666;
+    }
+    
+    .reset-filters:hover {
+      background: #e0e0e0;
+    }
+    
+    /* Popup styling */
+    .popup-content { font-size: 14px; line-height: 1.5; color: #333; max-width: 260px; }
+    .popup-content h3 { margin: 0 0 8px; color: #008000; font-size: 16px; font-weight: 500; }
+    .popup-content p { margin: 4px 0; }
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: none;
+    }
+    .leaflet-popup-tip { background: #fff; }
+    
+    /* Custom control styling */
+    .custom-control {
+      background: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      cursor: pointer;
+      margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .custom-control:hover {
+      background: #f8f8f8;
+      transform: translateY(-1px);
+    }
+    
+    /* Override MarkerCluster default colors */
+    .marker-cluster-small, 
+    .marker-cluster-medium, 
+    .marker-cluster-large {
+      background-color: rgba(0, 128, 0, 0.2);
+    }
+    .marker-cluster-small div, 
+    .marker-cluster-medium div, 
+    .marker-cluster-large div {
+      background-color: rgba(0, 128, 0, 0.6);
+      color: white;
+    }
+
+    .marker-cluster {
+      width: 58px !important;
+      height: 58px !important;
+      margin-left: -29px !important;
+      margin-top: -29px !important;
+    }
+    .marker-cluster div {
+      width: 48px !important;
+      height: 48px !important;
+      margin-left: 6px !important;
+      margin-top: 6px !important;
+      text-align: center;
+      border-radius: 36px !important;
+      font-size: 14px !important;
+      line-height: 48px !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Loading transactions...</p>
+  </div>
+  
+  <!-- Search button -->
+  <button class="search-button" onclick="toggleFilterModal()">
+    <i class="fas fa-search"></i>
+    Search Transactions
+  </button>
+  
+  <!-- Filter modal -->
+  <div class="filter-modal" id="filterModal">
+    <h2>Filter Transactions</h2>
+    <div class="filter-group">
+    <label for="sectorFilter">Sector</label>
+    <select id="sectorFilter">
+      <option value="">All Sectors</option>
+    </select>
+    </div>
+    <div class="filter-group">
+    <label for="subsectorFilter">Subsector</label>
+    <select id="subsectorFilter">
+      <option value="">All Subsectors</option>
+    </select>
+    </div>
+    <div class="filter-group">
+    <label for="nameFilter">Project Name</label>
+      <input type="text" id="nameFilter" placeholder="Search by name">
+    </div>
+    <div class="filter-actions">
+      <button class="apply-filters" onclick="applyFilters()">Apply</button>
+      <button class="reset-filters" onclick="resetFilters()">Reset</button>
+    </div>
+  </div>
+  
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- MarkerCluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  <!-- Papa Parse for CSV loading -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    // Global variables
+    var map, markersCluster, allMarkers = [], transactions = [];
+    var initialView = { center: [30, 10], zoom: 2.4 };  // More zoomed in view with adjusted center
+
+    // Define sector-subsector relationships
+    var sectorSubsectorMap = {
+      "Oil & Gas": ["LNG", "Pipelines", "Petrochemicals & Refining"],
+      "Conventional Power": ["Conventional Power"],
+      "Nuclear Energy": ["Nuclear Energy"],
+      "Renewables": ["Wind", "Solar", "Hydro", "Geothermal", "Biofuels & Biomass"],
+      "Satellites & Telecom": ["Satellites & Telecom"],
+      "Infrastructure": ["Water", "Transportation", "Other Infrastructure"],
+      "Chemical & Industrial": ["Metal", "Chemicals"],
+      "Advanced Fossil": ["Advanced Fossil"]
+    };
+
+    // Define two basemaps: light and dark
+    var lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+    });
+
+    // Initialize the map with the light basemap
+    map = L.map('map', { 
+      center: initialView.center, 
+      zoom: initialView.zoom, 
+      layers: [lightLayer],
+      maxBounds: [[-50, -180], [75, 180]],  // Wider bounds to allow proper navigation to all projects
+      minZoom: 2,  // Prevent zooming out too far
+      maxBoundsViscosity: 0.8  // Make the bounds less rigid to allow proper navigation
+    });
+
+    // Custom control: Reset view
+    var resetControl = L.control({position: 'topright'});
+    resetControl.onAdd = function(map) {
+      var div = L.DomUtil.create('div', 'custom-control');
+      div.innerHTML = 'Reset View';
+      div.onclick = function() {
+        map.setView(initialView.center, initialView.zoom);
+      };
+      return div;
+    };
+    resetControl.addTo(map);
+
+    // Initialize MarkerCluster group
+    markersCluster = L.markerClusterGroup({
+      maxClusterRadius: 115,  // Default is 80, increasing to 120 for wider clustering
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true
+    });
+    map.addLayer(markersCluster);
+
+    // Custom SVG marker icon using hex color #008000 (smaller)
+    var greenIcon = L.icon({
+      iconUrl: 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="33" viewBox="0 0 25 41"><path d="M12.5,0 C5.6,0 0,5.6 0,12.5 C0,22.5 12.5,41 12.5,41 C12.5,41 25,22.5 25,12.5 C25,5.6 19.4,0 12.5,0 z M12.5,17 A4.5,4.5 0 1,1 12.5,8 A4.5,4.5 0 0,1 12.5,17 z" fill="%23008000"/></svg>',
+      iconSize: [20, 33],
+      iconAnchor: [10, 33],
+      popupAnchor: [1, -30]
+    });
+
+    // Create marker for a transaction and add tooltip/popup
+    function createMarker(transaction) {
+      var lat = parseFloat(transaction["Latitude"]);
+      var lng = parseFloat(transaction["Longitude"]);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        var marker = L.marker([lat, lng], { icon: greenIcon });
+        // Popup with detailed info
+        var popupContent = `
+          <div class="popup-content">
+            <h3>${transaction["Project Name"]}</h3>
+            <p><strong>Sector:</strong> ${transaction["Sector A"]}</p>
+            <p><strong>Subsector:</strong> ${transaction["Subsector A"]}</p>
+            <p>${transaction["Description"]}</p>
+          </div>
+        `;
+        marker.bindPopup(popupContent);
+        // Tooltip for quick info on hover
+        marker.bindTooltip(transaction["Project Name"], { direction: 'top' });
+        marker.transactionData = transaction; // store data for filtering
+        return marker;
+      }
+      return null;
+    }
+
+    // Update markers based on filter values
+    function updateMarkers() {
+      markersCluster.clearLayers();
+      var sectorFilter = document.getElementById('sectorFilter').value;
+      var subsectorFilter = document.getElementById('subsectorFilter').value;
+      var nameFilter = document.getElementById('nameFilter').value.toLowerCase();
+      allMarkers.forEach(function(marker) {
+        var t = marker.transactionData;
+        var match = true;
+        if (sectorFilter && t["Sector A"] !== sectorFilter) match = false;
+        if (subsectorFilter && t["Subsector A"] !== subsectorFilter) match = false;
+        if (nameFilter && !t["Project Name"].toLowerCase().includes(nameFilter)) match = false;
+        if (match) {
+          markersCluster.addLayer(marker);
+        }
+      });
+    }
+
+    // Populate sector dropdown
+    function populateSectorDropdown() {
+      var sectorSelect = document.getElementById('sectorFilter');
+      // Clear existing options except the first one
+      while (sectorSelect.options.length > 1) {
+        sectorSelect.remove(1);
+      }
+      
+      // Add sectors from the predefined map
+      Object.keys(sectorSubsectorMap).forEach(function(sector) {
+        var option = document.createElement('option');
+        option.value = sector;
+        option.textContent = sector;
+        sectorSelect.appendChild(option);
+      });
+    }
+
+    // Update subsector dropdown based on selected sector
+    function updateSubsectorDropdown(selectedSector) {
+      var subsectorSelect = document.getElementById('subsectorFilter');
+      // Clear existing options except the first one
+      while (subsectorSelect.options.length > 1) {
+        subsectorSelect.remove(1);
+      }
+      
+      // If no sector is selected, leave subsector dropdown empty
+      if (!selectedSector) return;
+      
+      // Add subsectors for the selected sector
+      var subsectors = sectorSubsectorMap[selectedSector] || [];
+      subsectors.forEach(function(subsector) {
+        var option = document.createElement('option');
+        option.value = subsector;
+        option.textContent = subsector;
+        subsectorSelect.appendChild(option);
+      });
+    }
+
+    // Event listener for sector dropdown change
+    document.getElementById('sectorFilter').addEventListener('change', function() {
+      var selectedSector = this.value;
+      updateSubsectorDropdown(selectedSector);
+    });
+
+    // Inline CSV data
+    var csvData = `Sector A,Subsector A,Latitude,Longitude,Project Name,Description
+Conventional Power,Conventional Power,5.149771,7.330263,Aba Power,"Privately developed and owned, 120 MW, gas-fired power plant in Aba, Nigeria."
+Renewables,Solar,25.502785,-108.566895,Abengoa Solar Thermal,"40 MW of solar thermal power, from parabolic troughs, to provide supplemental steam for an operating coal-fired plant."
+Renewables,Hydro,-23.533143,-46.783905,AES-Tiete,$300 million project bond financing of the Tiete hydropower project. This financing won four Deal of the Year awards in 2000 for its Real Exchange Rate facility.
+Infrastructure,Water,25.944,50.588,Al Dur IWPP,"1,234 MW of electricity and 48 million gallons per day of potable water. This BOO project, sponsored by Gulf Investment Corporation and Suez-Tractebel, entered operations in 2012."
+Oil & Gas,Petrochemicals & Refining,25.849,51.455,Al-Karaana,"$6.5 billion petrochemical plant planned for Ras Laffan Industrial City, developed by Qatar Petroleum and Shell."
+Advanced Fossil,Advanced Fossil,64.837554,-147.718735,Fairbanks CTL,Integrated gasification and Fisher-Tropsch facility under development in Alaska.
+Oil & Gas,LNG,61.132463,-146.363297,Alaska Gasline Port Authority,"$20+ billion natural gas transportation project includes a gas conditioning plant, an 800 mile pipeline, and LNG plant and LPG extraction facilities in Valdez."
+Conventional Power,Conventional Power,22.401705,-97.937365,Altamira,"$590 million, 1,036 MW, gas-fired power plant sponsored by Iberdrola."
+Chemical & Industrial,Metal,26.097,50.5897016,Aluminium Bahrain Expansion,$1.7 billion financing of the expansion of aluminium smelter facility.
+Oil & Gas,LNG,-6.136459,12.352753,Angola LNG,Offshore gas processing and liquefaction facilities under development by state-owned and international oil companies.
+Renewables,Solar,36.5,-114.877853,Fotowatio Nevada Solar PV,"$135 million, 20 MW solar photovoltaic power generation project."
+Conventional Power,Conventional Power,-25.587349,-49.404831,Araucaria,"$360 million financing of a 469 MW, gas-fired power plant, sponsored by El Paso, Petrobras and Copel."
+Satellites & Telecom,Satellites & Telecom,0,75,Asia Broadcast Satellite 2,Geosynchronous broadcast satellite stationed at 75 E. 2013 <i>Trade Finance</i> Deal of the Year.
+Oil & Gas,LNG,-23.63446,151.168442,Australia Pacific LNG,"Up to $35 billion, 8.6 million ton per year integrated upstream, pipeline and liquefaction train. Sponsored by ConocoPhillips, Origin Energy and China Petrochemical Corporation (Sinopec), APLNG was a <i>PFI</i> and <i>Project Finance</i> Deal of the Year in 2012."
+Satellites & Telecom,Satellites & Telecom,4.587376,-74.069824,Avantel SA,Advised shareholders of a Colombian wireless telecommunications company on raising $60 million of debt to restructure existing senior loans.
+Oil & Gas,Pipelines,41.697526,44.780273,Baku-Tbilisi-Ceyhan Pipeline,"$3.6 billion, 1 million barrel per day oil pipeline.  Spanning Azerbaijan, Georgia and Turkey, the BTC pipeline was sponsored by British Petroleum, SOCAR, Unocal, Statoil, Itochu, TPAO, and others."
+Renewables,Wind,47.10098,-100.653992,North Dakota Wind Project,100 MW wind power generation project.
+Infrastructure,Water,39.2904,-76.6122,Baltimore Water,"A multi-part project to repair, rehabilitate, replace, and upgrade wastewater collection and treatment, water treatment and distribution, and stormwater management in Baltimore."
+Nuclear Energy,Nuclear Energy,22.8089275,54.6739235,Barakah Units 1-4,"5,400 MW nuclear generation plant in Abu Dhabi, sponsored by ENEC and KEPCO."
+Conventional Power,Conventional Power,39.933499,32.858219,Baymina,"777 MW, gas-fired power plant, completed in 2004 at a cost of $480 million."
+Renewables,Wind,41.19674,-90.118103,Illinois Wind Energy,200 MW wind power generation project.
+Renewables,Geothermal,41.590797,-118.54248,Blue Mountain,50 MW geothermal power project in northern California.
+Infrastructure,Other Infrastructure,43.661725,-79.370899,Bridgepoint Hospital,Public-private partnership in Toronto.
+Renewables,Wind,45.716787,-120.200858,Shepherds Flat,"$2 billion, 835 MW wind power generation using 338 turbines in Oregon. (Deal of the Decade nominee for <i>Infrastructure Journal</i>)."
+Renewables,Solar,35.191206,-119.728317,California Valley Solar Ranch,"$1.6 billion, 250 MW solar photovoltaic power generation."
+Nuclear Energy,Nuclear Energy,37.935842,-75.951111,Calvert Cliffs Unit 3,"Sponsored by UniStar, a 1,600 MW expansion of the operating Calvert Cliffs Nuclear Power Plant."
+Infrastructure,Transportation,38.7898,-77.1748,I-395 Express Lanes Extension,"Conversion of existing lanes to create eight miles of three reversible express lanes on I-395 in northern Virginia, to be implemented under a public-private partnership."
+Conventional Power,Conventional Power,5.681327,0.033817,Cenpower,"340 MW, tri-fuel independent power project in Tema, Ghana. (<i>PFI</i> 2014 Deal of the Year)"
+Infrastructure,Transportation,37,-76.1,Chesapeake Bay Bridge and Tunnel,"The Parallel Thimble Shoal Tunnel, an $800+ million two-lane tunnel to run parallel to an existing tunnel of the 20-mile Chesapeake Bay Bridge and Tunnel (CBBT) crossing, sponsored by the CBBT District using a Design-Build contracting model."
+Infrastructure,Transportation,35.7796,-78.6382,Complete 540,"The Complete 540 Project comprises two of three greenfield toll projects located in the greater Raleigh, North Carolina area. The project is being developed under a design-build procurement model, sponsored by the North Carolina Turnpike Authority."
+Oil & Gas,Pipelines,45.650528,13.778572,Constanza-Trieste Oil Pipeline,"$1.3 billion oil pipeline from Constanza, Romania to Trieste, Italy.  This project is one of several under consideration to allow Black Sea oil to bypass the increasingly crowded Bosporus."
+Conventional Power,Conventional Power,6.737,3.649,CPGNL Limited,Nigerian power business serving commercial and industrial customers from 12 operating plants with a total capacity of 58 MW; additional capacity under construction and in late-stage development.
+Renewables,Solar,34.254103,-115.8,Desert Sunlight,550 MW thin-film solar photovoltaic power generation
+Oil & Gas,Petrochemicals & Refining,19.636,57.697,Duqm Refinery and Petrochemicals Industries Company,"A joint venture between Oman Oil Company and Kuwait Petroleum International, developing a greenfield refinery to process 230,000 barrels of crude oil per day."
+Conventional Power,Conventional Power,29.758119,-95.368173,Dynegy Restructuring,"Over-collateralized, short-term, $200 million liquidity facility for Dynegy Corp. in 2002, which was successfully repaid in early 2003. This facility required rapid assessment of the value and condition of a series of gas peaking plants, as well as contractual arrangements with Dynegy that would mitigate the effect of its possible bankruptcy."
+Conventional Power,Conventional Power,-22.904008,-43.707169,Eletrobolt,"Successful value recovery for a commercial bank syndicate from a distressed, $350 million synthetic lease financing of the Eletrobolt power project in Brazil."
+Conventional Power,Conventional Power,3.491864,-76.517957,EmCali,"Restructuring of a power purchase agreement between a municipal electric distribution, telephone and water company and an independent power producer financed with a 144A bond, and restructuring of $345 million of the utility's local bank and supplier debt."
+Chemical & Industrial,Metal,24.8089275,54.6739235,EMAL Phase II,"Expansion of the Emirates Aluminum smelter to 1.3 million tonnes per year, at an approximate cost of $4.5 billion. (<i>PFI</i> 2013 Deal of the Year)"
+Conventional Power,Conventional Power,-20,0,OPIC Guarantee,Greengate has been awarded a financial advisory assignment with the Overseas Private Investment Corporation (OPIC) to provide transaction support services  in its evaluation of a request to provide its Non-Honoring Sovereign Guarantee insurance product in connection with a potential debt financing for the benefit of a utility located in Sub-Saharan Africa.
+Oil & Gas,Petrochemicals & Refining,18.15,-94.41666667,Etileno XXI,"$3.2 billion, one million ton per year polyethylene plant in Veracruz State, Mexico.  Sponsored by Braskem SA and Grupo Idesa, Etileno XXI was a <i>PFI</i> and <i>Project Finance</i> Deal of the Year in 2012."
+Oil & Gas,Pipelines,46.485156,30.723267,Euro-Asia Oil Transportation Corridor,"A consortium of European and Caucasian governments studied this system, using new and existing pipelines, rail and barges, to transport Caspian crude oil to refineries located in Eastern and Central Europe."
+Advanced Fossil,Advanced Fossil,30.082928,-90.9165,Faustina Hydrogen,"$1+ billion project, gasification of petroleum coke to produce syngas, ammonia and possibly other products."
+Infrastructure,Transportation,38.4367,-77.3441,Fredericksburg Extension,"The ""FredEx"" Project will extend the existing I-95 Express (managed) Lanes project near Washington DC south by 10 miles, which will be developed under a P3 procurement model, and is sponsored by Transurban."
+Infrastructure,Water,25.117855,56.347847,Fujairah IWPP,"$1.5 billion water desalination and power project, including a water pipeline to Al Ain."
+Oil & Gas,Pipelines,-18.145852,-57.568359,Gas TransBoliviano Expansion,"$125 million expansion of the Bolivian section of the Bolivia-to-Brazil natural gas pipeline owned by Transredes, Shell, Enron, El Paso, British Gas, and Petrobras."
+Oil & Gas,Pipelines,-15.2,-71.3,Gasoducto Sur Peruano,"A 600-mile pipeline, carrying natural gas from Camisea fields to the south of Peru. Initial investment to build the pipeline is estimated to exceed $3.6 billion. A concession to build and operate the pipeline was awarded to a consortium of Odebrecht and Enagas."
+Conventional Power,Conventional Power,,,,
+Renewables,Solar,33.668068,-114.988403,Genesis Solar CSP,250 MW solar thermal trough generation.
+Satellites & Telecom,Satellites & Telecom,30.432486,-90.086582,Globalstar,"Globalstar is launching a new generation of low earth orbit satellites, providing global voice and data services."
+Renewables,Wind,44.742832,-71.262817,Granite Reliable Power,99 MW wind power generation project.
+Infrastructure,Water,36.8968051,-76.4266474,Sustainable Water Initiative for Tomorrow,"$2 billion upgrade of existing Hampton Roads Sanitation District treatment works, adding advanced water treatment facilities and replenishing the Potomac Aquifer."
+Renewables,Geothermal,33.126267,-115.51506,Hudson Ranch,"49 MW, $350 million geothermal power generation in the Imperial Valley. Construction is underway, scheduled to complete in 2012."
+Satellites & Telecom,Satellites & Telecom,19.66328,75.629883,Hughes-Ipsat,$1.35 billion fixed-line telephony project in Maharashtra and Goa.
+Infrastructure,Water,39.7684,-86.1581,Indiana Finance Authority State Revolving Funds,Structuring of a $436 million loan to support the Indiana Finance Authority's municipal leveraged loan water and wastewater loan portfolio.
+Advanced Fossil,Advanced Fossil,37.982092,-87.023392,Indiana Gasification,"$2.65 billion integrated coal gasification and substitute natural gas (SNG) production project, with enhanced oil recovery CO2 capture/sequestration."
+Conventional Power,Conventional Power,37.9,27.13623,InterGen-Enka Power,"$2.2 billion financing of 3,850 MW of gas-fired, combined cycle power projects, sponsored by Intergen and Enka."
+Infrastructure,Transportation,39.7,-105,I-70 East,Advising the Build America Bureauon the improvement of the I-70 East corridor in Denver. Public-private partnership under which the selected developer will be responsible for the implementation on a Design-Build-Finance-Operate-Maintain (DBFOM) basis.
+Infrastructure,Transportation,39.7,-105,I-70 East,Advising the Build America Bureauon the improvement of the I-70 East corridor in Denver. Public-private partnership under which the selected developer will be responsible for the implementation on a Design-Build-Finance-Operate-Maintain (DBFOM) basis.
+Satellites & Telecom,Satellites & Telecom,39.533053,-76.63707,Iridium NEXT,"Iridium is building a second generation of its low earth orbit constellation, which provides telecommunications and data coverage to every point on Earth.  "
+Oil & Gas,Pipelines,31.774878,34.980469,Israel Electric Corporation Gas System,$250 million natural gas transmission project sponsored by the Israel Electric Corporation (IEC).
+Renewables,Solar,35.566305,-115.475235,Ivanpah Solar Energy Generating System,"370 MW, three plant, solar thermal tower generation"
+Conventional Power,Conventional Power,,,,
+Conventional Power,Conventional Power,33.0645,-8.619118,Jorf Lasfar,"$289 million leveraged acquisition of equity interests in the largest IPP in Morocco under a build, own and operate (BOO) structure."
+Renewables,Hydro,-13.581921,24.279785,Kabompo Gorge Hydroelectric Project,40 MW hydroelectric plant in Zambia.
+Advanced Fossil,Advanced Fossil,32.794779,-88.711166,Kemper County IGCC,"$2.4 billion IGCC power generation, using TRIG gasification technology from Southern Company and KBR. Captured CO2 will be used for enhanced oil recovery."
+Renewables,Hydro,7.928675,-72.125244,La Vueltosa,Refurbishment of an existing dam and installation of turbines by a state-owned distribution company under a concession arrangement.
+Advanced Fossil,Advanced Fossil,30.082928,-92,Lake Charles Methanol,Petcoke-to-methanol gasification project.
+Oil & Gas,LNG,40.228956,-74.072571,Liberty Point,LNG regasification terminal project.
+Renewables,Wind,-14.3,-74,Marcona & Tres Hermanas,"Two wind farms with capacity of 32 MW and a 97 MW, respectively, with combined project cost of $335 million, located in the Ica region in southern Peru and sponsored by Cobra Instalaciones y Servicios.  Each project will sell its output pursuant to a renewable energy supply concession granted by the Peruvian Ministry of Energy and Mines, based on a promotional tariff awarded under a competitive tender administered by OSINERGMIN, the regulatory body for investment in the energy and mines sector."
+Infrastructure,Transportation,38.9855,-76.9917,Maryland National Capital Purple Line,"16-mile, $2+ billion light rail transit in Maryland. Public-private partnership under which Purple Line Transit Partners, owned by Meridiam, Star America and Fluor Enterprises, will be responsible for the implementation on a Design-Build-Finance-Operate-Maintain (DBFOM) basis."
+Advanced Fossil,Advanced Fossil,41.895505,-106.204748,Medicine Bow Gasification,$1.5 billion coal-to-gasoline facility.
+Renewables,Solar,33.325556,-112.764167,Mesquite Solar 1,150 MW solar photovoltaic power generation.
+Infrastructure,Transportation,32.8531,-96.8912,Midtown Express Managed Lanes Project,"Near Dallas, Texas, the Midtown Express Managed Lanes Project will be developed under a design-build (""DB"") procurement model, and is sponsored by the Texas Department of Transportation (""TxDOT"")."
+Advanced Fossil,Advanced Fossil,30.403675,-88.527832,Mississippi Gasification,"$2 billion integrated pet coke gasification and SNG production facility, utilizing ConocoPhillips' E-Gas™ gasification technology."
+Oil & Gas,LNG,-10.5,40.4,Area 1 Mozambique LNG,"$20+ billion offshore gas production and onshore liquefaction facility, to produce 13.1 million tonnes of LNG per year. On signing, the largest project financing in African history. (PFI 2020 Global Multilateral Deal of the Year)"
+Infrastructure,Water,23.601391,58.398643,Muscat Waste Water,"$800 million waste water system in Muscat, Oman"
+Infrastructure,Water,-22.673818,14.528561,Namibia Desalination,Concession to develop and finance a $40 million water desalination project in Namibia.
+Chemical & Industrial,Chemicals,39.63848,66.95549,Navoiazot,$1 billion modernization of a fertilizer complex in Uzbekistan. 
+Renewables,Geothermal,17.156537,-62.576752,Nevis Geothermal Project,10 MW geothermal generation project on the island of Nevis.
+Conventional Power,Conventional Power,42.322001,-71.61438,New England Electric System,$1.7 billion syndicated debt transaction for the acquisition of New England Electric System's merchant thermal and hydropower generation assets.
+Renewables,Biofuels & Biomass,25.49209,32.605,NFIL Biodiesel,"Two separate integrated jatropha plantations, jatropha oil and biodiesel projects in Senegal and Egypt."
+Renewables,Biofuels & Biomass,14.264383,-14.47998,NFIL Senegal Ethanol & Power,"Sugar-based ethanol refinery complex, including a 375 million liter per year ethanol production facility, sugar plantations, a co-generation plant and a separate electric power facility."
+Oil & Gas,Petrochemicals & Refining,55.628093,51.811008,NizhnekamskNeftekhim,"Expansion of the OAO ""NizhnekamskNeftekhim"" complex in Tartarstan, one of the largest petrochemical facilities in Russia."
+Chemical & Industrial,Chemicals,46,-123,Port of Kalama Methanol,"$1.8 billion project to produce methanol from natural gas, sponsored by Northwest Innovation Works."
+Renewables,Biofuels & Biomass,36.049099,-102.5,Omni Biodiesel,"$14 million, 10 million gallon per year biodiesel facility in Texas."
+Renewables,Biofuels & Biomass,36.049099,-101.5,Omni Ethanol,100 million gallon per year ethanol facility.
+Chemical & Industrial,Chemicals,10.239523,-61.633258,La Brea Nitrogen,$800 million fertilizer project producing ammonia and UAN in Trinidad.
+Satellites & Telecom,Satellites & Telecom,37.2,-78.6,OneWeb,"Constellation of 648 satellites to provide global, low-latency, broadband internet connectivity to rural regions, areas affected by infrastructure crises, and airplanes. Investors are SoftBank, Airbus, Bharti Enterprises, Hughes, Intelsat, Qualcomm, Coca-Cola, Totalplay, and Virgin Group."
+Infrastructure,Water,33.7175,-117.8311,Orange County Water District,$124 million loan to support the 30 million gallon per day expansion of the Orange County Water District's groundwater replenishment system.
+Renewables,Geothermal,38.89639,-118.37861,Ormat Nevada Geothermal,100+ MW geothermal project portfolio financing worth hundreds of millions of dollars.
+Conventional Power,Conventional Power,-7.71011,113.578291,Paiton,Successful restructuring of $1.5 billion of debt from the Paiton power project in Indonesia.
+Renewables,Biofuels & Biomass,46.789,18.811,Pannonia Ethanol,Expansion financing of project now producing 500 million liters of ethanol per year.
+Oil & Gas,LNG,-9.43687,147.189331,Papua New Guinea LNG,"Integrated upstream, pipeline and liquefaction project sponsored by ExxonMobil, Oil Search, Santos, Nippon Oil and the State of Papua New Guinea.  At more than $16 billion, PNG LNG is the largest foreign investment ever in Papua New Guinea."
+Oil & Gas,Petrochemicals & Refining,1.357,104.148,RAPID,"300,000 barrel per day refinery and petrochemical development in Malaysia, sponsored by Saudi Aramco and Petronas. 2019 PFI Asia-Pacific petrochemical Deal of the Year."
+Oil & Gas,LNG,-13.251976,-76.304169,Peru LNG,"This $3.9 billion project is the first LNG export in South America and the Pacific coast of the Americas.  The project includes a 4.45 million ton per year liquefaction plant, 408 kilometer gas pipeline and a marine terminal. (2008 Deal of the Year for <i>PFI</i> and <i>Trade Finance</i>)"
+Oil & Gas,Petrochemicals & Refining,22.9,38.6,Rabigh Phase II Project,"Expansion of the existing Petro Rabigh refinery and petrochemical complex, including: a new aromatics complex to process 3 million tons per annum of naphtha, ethane cracker expansion to process an additional 30 million standard cubic feet per day of ethane, and the construction of new process units to produce high value-added petrochemical products. Sponsored by Saudi Aramco and Sumitomo Chemical."
+Renewables,Wind,34,-92,Plains and Eastern Clean Line,"705-mile direct current transmission line that will carry up to 4,000 megawatts of wind-generated power from Oklahoma and Texas to the southeastern United States.  "
+Conventional Power,Conventional Power,37.287165,126.724548,POSCO Power,"More than 1,400 MW of new power generation capacity, fired by LNG and process-gas from steel works."
+Renewables,Solar,34.054935,-118.243103,Project Amp Distributed PV,"Approximately 733 MW of rooftop PV generation, distributed across the United States."
+Infrastructure,Transportation,36.1,-114,Project NEON,"Advising the Build America Bureau on an $800 million expansion of a section of I-15 in Las Vegas, sponsored by the Nevada Department of Transportation under a  public-private partnership (P3) procurement."
+Renewables,Solar,39.061166,-75.38683,Distributed Generation,"A portfolio of 19 MW of PV generation, distributed across 59 sites in four states and Puerto Rico."
+Oil & Gas,LNG,25.949,51.505131,Qatargas II LNG Export Project,"Sponsored by ExxonMobil and Qatar Petroleum, the two 7.8 million ton per year liquefaction trains at this $8.7 billion project are the largest in the world.  (<i>Project Finance</i> 2004 Deal of the Year)"
+Oil & Gas,LNG,25.908,51.633248,Qatargas 3 LNG Export Project,"$5.8 billion, 7.8 million tons per year liquefaction train, sponsored by Qatar Petroleum and ConocoPhillips."
+Oil & Gas,Petrochemicals & Refining,25.809,51.555,Q-Chem II,"$1.5 billion polyethylene and derivatives facilities complex in Qatar, including a cracker shared with a separately financed and owned project, a pipeline, and a world-scale normal alpha olefins complex.  Sponsored by Qatar Petroleum and ChevronPhillips, Q-Chem II was a <i>Project Finance</i> Deal of the Year in 2005."
+Infrastructure,Transportation,-0.142135,-78.488131,Quito Airport,"Advised a joint venture partner on its agreement with the other consortium members in connection with the development and financing of the Quito Airport, Ecuador."
+Conventional Power,Conventional Power,25.854,50.026,Qurayyah IPP,"3,927 MW, combined cycle, gas-fired independent power plant in Saudi Arabia. Upon completion, scheduled for 2014, Qurayyah is expected to be the largest combined-cycle IPP in the world."
+Chemical & Industrial,Metal,29.482643,47.713623,Raytheon Aluminum,$1 billion aluminum smelter in Kuwait
+Chemical & Industrial,Chemicals,32.059882,-93.168869,Red River Environmental Products,Activated carbon production facility for control of mercury emissions from coal-fired power plants.
+Chemical & Industrial,Metal,38.137611,-81.274281,RED-Globe WVA,Power generation using advanced heat recovery from silicon smelter operations.
+Oil & Gas,Petrochemicals & Refining,-22.4,-42.4,Rio Polimeros,"$1 billion polyethylene and ethylene complex sponsored by Petrobras, Suzano, Unipar, and BNDESPar."
+Conventional Power,Conventional Power,24.725004,46.715927,Riyadh IPP,"$2.1 billion, 1,729 MW IPP, completed in 2013."
+Oil & Gas,Petrochemicals & Refining,26.937,49.4842492,Sadara,"Integrated petrochemical complex in Jubail Industrial City II, sponsored by Saudi Aramco and the Dow Chemical Company. With 26 manufacturing units, output of more than 3 million tonnes per year, the $20 billion project was the largest petrochemical facility built in a single phase. (<i>PFI</i> 2013 Deal of the Year)"
+Conventional Power,Conventional Power,23.8,50,Saudi Aramco Cogeneration Plants,"Three steam and electricity cogeneration plants, at Abqaiq, Hawiyah and Ras Tanura, to be built on a BOOT basis for Saudi Aramco. 2015 Middle East power deal award winner from <i>IJGlobal</i>."
+Oil & Gas,Petrochemicals & Refining,28,48.611511,Saudi Kayan,"$10 billion, 2.1 million ton per year Saudi petrochemical project.  Among other aspects of the project, Greengate analyzed the cash flow and market risk of 16 products."
+Conventional Power,Conventional Power,-31.393502,-53.751984,Seival,"500 MW, coal-fired, mine-mouth power plant in Brazil. Equity commitments successfully negotiated and closed via an international auction."
+Renewables,Solar,10,-2,Ghana Solar,"50 MW solar photovoltaic project in northwestern Ghana, sponsored by Episolar."
+Renewables,Solar,51.134878,13.187199,Signet Solar,"€66 million, thin-film photovoltaic module manufacturing plant in Germany, utilizing a turn-key fabication line to deploy quickly."
+Chemical & Industrial,Chemicals,40.282,49.713,SOCAR GPC,"$4 billion, 10 billion cubic meter per year gas processing plant, with steam cracker, swing polyethylene unit, and other units."
+Nuclear Energy,Nuclear Energy,28.795117,-96.051922,South Texas Project Units 3 and 4,"2,700 MW expansion of the South Texas Project nuclear generation plant, sponsored by Toshiba, NRG and CPS Energy."
+Satellites & Telecom,Satellites & Telecom,-114.5,0,Spectrum Five,"Wide-band DBS broadcast satellite at 114.5W, to be launched in 2012."
+Satellites & Telecom,Satellites & Telecom,23.079732,79.716797,Spice Cellular,$300 million financing for the buildout of two GSM cellular networks in the Punjab and Karnataka circles.
+Renewables,Wind,39.35129,-114.551697,Nevada Wind Project,150 MW wind generation project.
+Conventional Power,Conventional Power,25.88,68.5,Star Power,"126 MW, gas-fired power plant sponsored by Pakistan Power Resources."
+Oil & Gas,Petrochemicals & Refining,39.3,26.97,SOCAR Turkey Aegean Refinery (STAR),10 million metric ton per year crude oil refinery sponsored by SOCAR and TURCAS.  The $6+ billion facility is located in Aliaga on the Aegean coast of the Republic of Turkey. (<i>PFI</i> 2014 Deal of the Year)
+Oil & Gas,Petrochemicals & Refining,29.5,32.33,Tahrir Project,"$3.5 billion petrochemicals project to be located in in the Ain Sokhna industrial complex, Egypt.  The plant will produce 1.35 million tons of ethylene and related products a year."
+Chemical & Industrial,Metal,20.6,-15.4,Tasiast,"Mill expansion for an operating gold mine in Mauritania, sponsored by Kinross."
+Advanced Fossil,Advanced Fossil,39.549986,-89.292927,Christian County Gasification,"$3.5 billion, 602 MW substitute natural gas and power generation being developed by Tenaska."
+Conventional Power,Conventional Power,21.295772,-100.516834,Bajio,"$430 million, 601 MW power project sponsored by Intergen and AEP Resources. This project was the first hybrid merchant project in Mexico and was a <i>Project Finance</i> 2000 Deal of the Year."
+Advanced Fossil,Advanced Fossil,31.7,-102.6,Texas Clean Energy Project,"$2.5+ billion IGCC facility with urea synthesis, expected to capture 90% of CO2 emissions for enhanced oil recovery."
+Oil & Gas,Pipelines,39.164141,53.569336,TransCaspian Gas Pipeline Project,"Development and financing of the $3 billion TransCaspian Gas Pipeline Project, running from Turkmenistan across the Caspian Sea through Azerbaijan and Georgia to Turkey.  The project was sponsored by Bechtel Enterprises and GE Capital with involvement from Shell."
+Oil & Gas,Pipelines,42.061529,52.476196,TransCaspian Oil and Gas Pipelines ,"Dual pipelines to transport gas and oil from Kazakhstan to Azerbaijan, Turkey and southeast Europe."
+Renewables,Solar,43.61172,-116.206512,PV Manufacturing,Manufacturing facility that will produce 740 MW of polycrystalline modules per year.
+Renewables,Biofuels & Biomass,38.504083,28.704258,Waste to Energy,"Private, $44 million, 4 MW generation facility in Turkey."
+Infrastructure,Other Infrastructure,15.834536,108.017578,Vietnam Infrastructure Funds,"Investment, operating and financial policies developed for local development funds to promote infrastructure investment. Greengate performed this work with Cambridge Energy Research Associates."
+Nuclear Energy,Nuclear Energy,33.142151,-81.760941,Vogtle Electric Generating Plant Units 3 and 4,"2,200 MW expansion of the Vogtle nuclear power plant, the first new nuclear construction in the United States in decades. Vogtle Units 3 and 4 received more than $8 billion in conditional commitments for DOE loan guarantees."
+Oil & Gas,LNG,71.22,71.98,Yamal LNG,LNG export project sponsored by OAO Novatek and Total SA.
+Oil & Gas,Petrochemicals & Refining,24.084043,38.071489,Yanbu Export Refinery Project,"$14.7 billion, 400 thousand barrel per day facility sponsored by Saudi Aramco and ConocoPhillips."
+Conventional Power,Conventional Power,38.980496,-77.099648,US IPP portfolio divestiture,"Valuation and sale, for $650 million, of equity interests in a portfolio of 13 independent power and cogeneration facilities."
+Renewables,Biofuels & Biomass,33.491804,-80.855684,Orangeburg County Biomass,35 MW wood-fired power generation.
+Renewables,Biofuels & Biomass,47.5061125,-111.3044616,Montana Advanced Biofuels,$500 million advanced biofuels project utilizing wheat and barley as feedstocks to produce 115 million gallons per year of biofuels and other products.
+`;
+
+    // Parse the inline CSV data using Papa Parse
+    Papa.parse(csvData, {
+      header: true,
+      complete: function(results) {
+        transactions = results.data;
+        populateSectorDropdown();
+        transactions.forEach(function(t) {
+          var marker = createMarker(t);
+          if (marker) {
+            allMarkers.push(marker);
+            markersCluster.addLayer(marker);
+          }
+        });
+        document.getElementById("loading").style.display = "none";
+      },
+      error: function(err) {
+        console.error("Error parsing CSV data:", err);
+      }
+    });
+
+    // New function to toggle filter modal
+    function toggleFilterModal() {
+      const modal = document.getElementById('filterModal');
+      modal.classList.toggle('active');
+    }
+
+    // Update the filter functions
+    function applyFilters() {
+      updateMarkers();
+      toggleFilterModal();
+    }
+
+    function resetFilters() {
+      document.getElementById('sectorFilter').value = '';
+      document.getElementById('subsectorFilter').value = '';
+      document.getElementById('nameFilter').value = '';
+      updateMarkers();
+      toggleFilterModal();
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+      const modal = document.getElementById('filterModal');
+      const searchButton = document.querySelector('.search-button');
+      
+      if (!modal.contains(event.target) && !searchButton.contains(event.target) && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
