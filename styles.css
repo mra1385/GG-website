@@ -919,24 +919,12 @@ footer p {
     }
     
     .expertise-areas {
+        display: grid;
         grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     
     .expertise-item {
-        padding: 1.25rem;
-    }
-    
-    #what-we-do .expertise-item {
-        padding: 1.5rem;
-    }
-    
-    #what-we-do .expertise-areas {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    
-    #what-we-do .expertise-item {
         width: 100%;
         margin: 0;
     }
