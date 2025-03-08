@@ -22,10 +22,6 @@
     <link rel="stylesheet" href="styles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script>
-        // Add js-enabled class to body if JavaScript is working
-        document.documentElement.className += ' js-enabled';
-    </script>
 </head>
 <body>
     <div class="site-wrapper">
@@ -395,6 +391,23 @@
                 });
             });
         });
+    </script>
+    
+    <!-- Fallback script to ensure content is visible even if main JS fails -->
+    <script>
+        // Ensure all sections are visible after a delay
+        setTimeout(function() {
+            document.querySelectorAll('.section').forEach(function(section) {
+                section.classList.add('visible');
+                
+                // Ensure all containers are visible
+                const container = section.querySelector('.container');
+                if (container) {
+                    container.style.opacity = '1';
+                    container.style.transform = 'none';
+                }
+            });
+        }, 1000); // 1 second delay
     </script>
 </body>
 </html> 
