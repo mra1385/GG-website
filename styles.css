@@ -742,6 +742,7 @@ footer p {
         min-height: 0;
     }
     
+    /* Ensure expertise items stack properly in grid */
     #what-we-do .expertise-item {
         height: auto;
         min-height: 0;
@@ -927,6 +928,17 @@ footer p {
     
     #what-we-do .expertise-item {
         padding: 1.5rem;
+    }
+    
+    #what-we-do .expertise-areas {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    #what-we-do .expertise-item {
+        width: 100%;
+        margin: 0;
     }
 }
 
