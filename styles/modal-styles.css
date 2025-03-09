@@ -1,0 +1,87 @@
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    position: relative;
+}
+
+.modal-content h2 {
+    margin-bottom: 0;
+    color: #333;
+}
+
+.modal-content h3 {
+    margin-top: 5px;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.modal-content p {
+    position: relative;
+    padding-top: 20px;
+    margin-top: 0;
+}
+
+.modal-content p::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background-color: #4CAF50;
+}
+
+.close-modal {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #555;
+}
+
+.team-member {
+    cursor: pointer;
+    text-align: center;
+    padding: 20px;
+    transition: transform 0.2s;
+}
+
+.team-member:hover {
+    transform: translateY(-5px);
+}
+
+.team-member h3 {
+    margin: 10px 0;
+    color: #333;
+}
+
+.team-member img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+} 
