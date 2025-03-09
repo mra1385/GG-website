@@ -18,11 +18,18 @@
     <meta http-equiv="pragma" content="no-cache">
     <title>Greengate - Energy & Infrastructure Project Finance Advisory</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Simplified CSS path that works in both environments -->
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="components/navigation/navigation.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="styles/modal-styles.css">
+    <link rel="stylesheet" href="components/team/modal-styles.css">
+    <link rel="stylesheet" href="components/news/news.css">
+    <link rel="stylesheet" href="components/team/team.css">
+    <link rel="stylesheet" href="components/transactions/transactions.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Override Styles -->
+    <link rel="stylesheet" href="components/navigation/navbar-responsive.css">
 </head>
 <body>
     <div class="site-wrapper">
@@ -34,67 +41,26 @@
                     <span class="logo-text">GREENGATE</span>
                 </div>
                 <div class="nav-links">
-                    <a href="#about">Who We Are</a>
-                    <a href="#what-we-do">What We Do</a>
-                    <a href="#transactions">Transactions</a>
-                    <a href="#team">Our Team</a>
-                    <a href="#contact">Contact Us</a>
+                    <a href="#about" onclick="if(window.innerWidth <= 850){document.querySelector('.mobile-menu-btn').click();}">Who We Are</a>
+                    <a href="#what-we-do" onclick="if(window.innerWidth <= 850){document.querySelector('.mobile-menu-btn').click();}">What We Do</a>
+                    <a href="#transactions" onclick="if(window.innerWidth <= 850){document.querySelector('.mobile-menu-btn').click();}">Transactions</a>
+                    <a href="#team" onclick="if(window.innerWidth <= 850){document.querySelector('.mobile-menu-btn').click();}">Our Team</a>
+                    <a href="#contact" onclick="if(window.innerWidth <= 850){document.querySelector('.mobile-menu-btn').click();}">Contact Us</a>
                 </div>
                 <div class="nav-right">
                     <button class="news-toggle-btn" aria-label="Toggle News Panel">
                         <i class="fas fa-newspaper"></i>
                         <span>Latest News</span>
                     </button>
-                    <button class="mobile-menu-btn" aria-label="Toggle Mobile Menu">
+                    <button class="mobile-menu-btn" aria-label="Toggle Mobile Menu" onclick="this.classList.toggle('active'); document.querySelector('.nav-links').classList.toggle('active'); var icon = this.querySelector('i'); if(icon.classList.contains('fa-bars')){icon.classList.remove('fa-bars'); icon.classList.add('fa-times');} else {icon.classList.remove('fa-times'); icon.classList.add('fa-bars');}">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
             </div>
         </nav>
 
-        <!-- News Panel -->
-        <div class="news-panel">
-            <div class="news-panel-header">
-                <h3>Latest News</h3>
-                <button class="close-news-btn" aria-label="Close News Panel">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="news-items">
-                <div class="news-item">
-                    <div class="news-date">February 2025</div>
-                    <h4><a href="https://www.sbmoffshore.com/newsroom/fpso-almirante-tamandare-producing-and-on-hire/" target="_blank" rel="noopener noreferrer">FPSO Amirante Tamandaré</a></h4>
-                    <p><strong>Client:</strong> Export Credit Agencies<br>
-                    <strong>Location:</strong> Brazil</p>
-                    <p>Floating production, storage and offloading unit (FPSO) Amirante Tamandaré completed its continuous production test and is operating under charter to Petrobras. FPSO Amirante Tamandaré is the largest oil producing unit in Brazil, with a capacity of 225,000 barrels of oil and 12 million cubic meters of gas per day.</p>
-                    <p>Greengate advised a consortium of four export credit agencies financing the project.</p>
-                </div>
-                <div class="news-item">
-                    <div class="news-date">February 2025</div>
-                    <h4><a href="https://www.pfie.com/story/5009326/middle-east-africa-awards-6y0v9b9ndx#:~:text=Petrochemical%20Deal%20of%20the%20Year,international%20banks%20joined%20the%20financing" target="_blank" rel="noopener noreferrer">Amiral</a></h4>
-                    <p><strong>Client:</strong> Export Credit Agencies<br>
-                    <strong>Location:</strong> Saudi Arabia</p>
-                    <p>The Amiral petrochemical project, an expansion of the existing SATORP refinery, has been awarded Middle East & Africa Petrochemical Deal of the Year for 2024 by Project Finance International.</p>
-                    <p>Greengate advised three export credit agencies on the financing of this $11 billion project, sponsored by Saudi Aramco and TotalEnergies.</p>
-                </div>
-                <div class="news-item">
-                    <div class="news-date">January 2025</div>
-                    <h4><a href="https://www.cbbt.com/news/project-milestone/" target="_blank" rel="noopener noreferrer">Chesapeake Bay Bridge-Tunnel</a></h4>
-                    <p><strong>Client:</strong> US DOT TIFIA<br>
-                    <strong>Location:</strong> Virginia, USA</p>
-                    <p>Boring of the mile-long Parallel Thimble Shoal Tunnel, part of the Chesapeake Bay Bridge-Tunnel, was completed.</p>
-                    <p>Greengate advised the US Department of Transportation TIFIA program on the financing of this project.</p>
-                </div>
-                <div class="news-item">
-                    <div class="news-date">January 2025</div>
-                    <h4><a href="https://www.energy.gov/lpo/articles/doe-announces-166-billion-loan-guarantee-plug-power-produce-and-liquify-clean-hydrogen" target="_blank" rel="noopener noreferrer">Plug Power</a></h4>
-                    <p><strong>Client:</strong> US Department of Energy<br>
-                    <strong>Location:</strong> Multiple US states</p>
-                    <p>The US Department of Energy closed on a $1.66 billion loan guarantee to finance construction of up to six facilities producing clean hydrogen using Plug Power's electrolyzer technology.</p>
-                    <p>Greengate advised DOE on financing this project and will continue to support DOE in post-closing activities.</p>
-                </div>
-            </div>
-        </div>
+        <!-- Load Latest News Component -->
+        <div id="latest-news-container"></div>
 
         <!-- Main Content -->
         <main>
@@ -190,7 +156,9 @@
                 <div class="container">
                     <h2>Transactions</h2>
                     <div id="map-container">
-                        <!-- Map will be loaded here -->
+                        <div class="map-loading">
+                            <div class="map-loading-spinner"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="scroll-indicator">
@@ -203,49 +171,49 @@
                 <div class="container">
                     <h2>Our Team</h2>
                     <div class="team-grid">
-                        <div class="team-member" onclick="openModal('paul-ameer')">
+                        <div class="team-member" data-modal="modal-paul-ameer">
                             <h3>Paul Ameer, CFA</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('chris-dymond')">
+                        <div class="team-member" data-modal="modal-chris-dymond">
                             <h3>Chris Dymond</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('radoslav-shipkoff')">
+                        <div class="team-member" data-modal="modal-radoslav-shipkoff">
                             <h3>Radoslav Shipkoff</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('brandon-bowen')">
+                        <div class="team-member" data-modal="modal-brandon-bowen">
                             <h3>Brandon Bowen</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('jeremy-levine')">
+                        <div class="team-member" data-modal="modal-jeremy-levine">
                             <h3>Jeremy Levine</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('travis-dunbar')">
+                        <div class="team-member" data-modal="modal-travis-dunbar">
                             <h3>Travis Dunbar</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('mike-azar')">
+                        <div class="team-member" data-modal="modal-mike-azar">
                             <h3>Mike Azar</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('sarah-ralston')">
+                        <div class="team-member" data-modal="modal-sarah-ralston">
                             <h3>Sarah Ralston</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('john-beasley')">
+                        <div class="team-member" data-modal="modal-john-beasley">
                             <h3>John Beasley</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('brandon-reilly')">
+                        <div class="team-member" data-modal="modal-brandon-reilly">
                             <h3>Brandon Reilly</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('frederick-richardson')">
+                        <div class="team-member" data-modal="modal-frederick-richardson">
                             <h3>Frederick Richardson</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('adam-brown')">
+                        <div class="team-member" data-modal="modal-adam-brown">
                             <h3>Adam Brown</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('evan-frey')">
+                        <div class="team-member" data-modal="modal-evan-frey">
                             <h3>Evan Frey</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('fatima-mosawi')">
+                        <div class="team-member" data-modal="modal-fatima-mosawi">
                             <h3>Fatima Mosawi</h3>
                         </div>
-                        <div class="team-member" onclick="openModal('mohamad-chebli')">
+                        <div class="team-member" data-modal="modal-mohamad-chebli">
                             <h3>Mohamad Chebli</h3>
                         </div>
                     </div>
@@ -254,9 +222,6 @@
                     <i class="fas fa-chevron-down"></i>
                 </div>
             </section>
-
-            <!-- Team modals container -->
-            <div id="team-modals-container"></div>
 
             <!-- Contact Section -->
             <section id="contact" class="section">
@@ -297,56 +262,80 @@
             </section>
         </main>
 
+        <!-- Team modals container -->
+        <div id="team-modals-container"></div>
+
         <div class="copyright">
             <p>&copy; 2025 Greengate LLC. All rights reserved.</p>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="script.js"></script>
-    <script src="scripts/modals.js"></script>
     <script>
-        // Load team modals
-        fetch('components/team-modals.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('team-modals-container').innerHTML = html;
-            })
-            .catch(error => console.error('Error loading team modals:', error));
-    </script>
-
-    <!-- Additional script to ensure links open in new tabs -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all news item links
-            const newsLinks = document.querySelectorAll('.news-item h4 a');
-            
-            // Add click event listener to each link
-            newsLinks.forEach(link => {
-                link.addEventListener('click', function(event) {
-                    // Open in new tab and prevent default behavior
-                    window.open(this.href, '_blank');
-                    event.preventDefault();
-                });
+        function openTeamModal(modalId) {
+            import('./components/team/team.js').then(module => {
+                const Team = module.Team;
+                Team.openModal(modalId);
             });
+        }
+
+        function closeTeamModal(modalId) {
+            import('./components/team/team.js').then(module => {
+                const Team = module.Team;
+                Team.closeModal(modalId);
+            });
+        }
+
+        // Close all modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeTeamModal(e.target.id);
+            }
+        });
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal.active');
+                if (openModal) {
+                    closeTeamModal(openModal.id);
+                }
+            }
         });
     </script>
-    
-    <!-- Fallback script to ensure content is visible even if main JS fails -->
-    <script>
-        // Ensure all sections are visible after a delay
-        setTimeout(function() {
+    <script type="module">
+        import { Navigation } from './components/navigation/navigation.js';
+        import { News } from './components/news/news.js';
+        import { Team } from './components/team/team.js';
+        import { Transactions } from './components/transactions/transactions.js';
+        
+        // Initialize components when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            Navigation.init();
+            News.init();
+            Team.init();
+            Transactions.init();
+
+            // Initialize close modal buttons
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        closeTeamModal(modal.id);
+                    }
+                });
+            });
+            
+            // Make sections visible
             document.querySelectorAll('.section').forEach(function(section) {
                 section.classList.add('visible');
-                
-                // Ensure all containers are visible
                 const container = section.querySelector('.container');
                 if (container) {
                     container.style.opacity = '1';
                     container.style.transform = 'none';
                 }
             });
-        }, 1000); // 1 second delay
+        });
     </script>
 </body>
 </html> 

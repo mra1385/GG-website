@@ -1,0 +1,57 @@
+/* CSS Variables */
+:root {
+    /* Colors */
+    --primary-color: 76, 175, 80; /* RGB values for #4CAF50 green */
+    --primary-color-hex: #4CAF50;
+    --primary-dark: #3e8e41;
+    --text-color: #333;
+    --text-light: #555;
+    --text-lighter: #666;
+    --text-lightest: #777;
+    --background-color: #ffffff;
+    --background-light: #f8f9fa;
+    --border-color: rgba(0, 0, 0, 0.05);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --link-color: #0066cc;
+    --link-hover: #004d99;
+
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+
+    /* Font Sizes */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-md: 1.125rem;
+    --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
+    --font-size-xxxl: 3rem;
+
+    /* Border Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-full: 40px;
+
+    /* Transitions */
+    --transition-base: all 0.3s ease;
+    --transition-fast: all 0.2s ease;
+    --transition-slow: all 0.5s ease;
+
+    /* Z-index layers */
+    --z-index-base: 1;
+    --z-index-navbar: 1000;
+    --z-index-modal: 1010;
+    --z-index-news: 1020;
+
+    /* Component Specific */
+    --news-panel-width: 350px;
+    --navbar-height: 60px;
+    --container-max-width: 1200px;
+} 

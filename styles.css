@@ -243,9 +243,9 @@ body {
 }
 
 .container h2 {
-    font-size: 2.2rem;
+    font-size: var(--font-size-xxl);
     font-weight: 600;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     position: relative;
     display: inline-block;
     color: #333;
@@ -285,7 +285,7 @@ body {
 }
 
 .hero h1 {
-    font-size: 3rem;
+    font-size: var(--font-size-xxxl);
     font-weight: 700;
     margin-bottom: 1.5rem;
     color: #333;
@@ -296,7 +296,7 @@ body {
 }
 
 .hero p {
-    font-size: 1.2rem;
+    font-size: var(--font-size-md);
     color: #333;
     margin-bottom: 2.5rem;
     line-height: 1.7;
@@ -410,17 +410,21 @@ body {
 }
 
 /* Team section */
+#team .container h2 {
+    margin-bottom: 0.5rem;
+}
+
 .team-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
-    padding: 2rem 0;
+    padding: 0;
 }
 
 .team-member {
     background: transparent;
     border-radius: 0;
-    padding: 2rem;
+    padding: 1rem 2rem;
     position: relative;
     transition: all 0.4s ease, transform 0.5s ease;
     box-shadow: none;
@@ -449,7 +453,7 @@ body {
 }
 
 .team-member .header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
     padding-left: 0.5rem;
 }
 
@@ -784,15 +788,22 @@ footer p {
     
     .nav-links.active {
         height: auto;
-        padding: 1rem 0;
+        padding: 0.5rem 0;
     }
     
     .nav-links a {
         width: 100%;
-        padding: 1rem 5%;
+        padding: 0.75rem 5%;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         justify-content: flex-start;
         height: auto;
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: 0.2px;
+    }
+    
+    .nav-links a:hover {
+        background-color: rgba(76, 175, 80, 0.05);
     }
     
     .nav-links a:last-child {
@@ -1131,15 +1142,15 @@ html {
 
 /* Map container specific styling */
 #map-container {
-    width: 100%;
-    max-width: 1200px;
-    height: 600px;
+    width: 60%;
+    max-width: 900px;
+    height: 300px;
     background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     overflow: hidden;
     position: relative;
-    margin: 2rem auto;
+    margin: 1rem auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -1154,7 +1165,7 @@ html {
 
 /* Ensure the transactions section container accommodates the map */
 #transactions .container {
-    max-width: 1200px; /* Match the map container width */
+    max-width: 1200px;
     padding: 2rem;
     margin: 0 auto;
 }

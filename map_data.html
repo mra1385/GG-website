@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Professional Transactions Map</title>
+  <title>Greengate Transactions Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Google Font for modern typography -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -48,7 +48,7 @@
       left: 30px;
       background: #4CAF50;
       color: white;
-      padding: 12px 24px;
+      padding: 8px 8px;
       border-radius: 25px;
       border: none;
       cursor: pointer;
@@ -91,7 +91,7 @@
     .filter-modal h2 {
       margin: 0 0 20px;
       color: #333;
-      font-size: 18px;
+      font-size: var(--font-size-lg);
       font-weight: 500;
     }
     
@@ -102,7 +102,7 @@
     .filter-group label {
       display: block;
       margin-bottom: 4px;
-      font-size: 0.85rem;
+      font-size: var(--font-size-sm);
       color: #333;
     }
     
@@ -112,12 +112,12 @@
       padding: 6px 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
-      font-size: 0.85rem;
+      font-size: var(--font-size-sm);
       box-sizing: border-box;
     }
     
     .filter-group input::placeholder {
-      font-size: 0.8rem;
+      font-size: var(--font-size-xs);
       color: #999;
     }
     
@@ -130,11 +130,75 @@
     .filter-actions button {
       flex: 1;
       padding: 6px 10px;
-      font-size: 0.85rem;
+      font-size: var(--font-size-sm);
       border: none;
       border-radius: 4px;
       cursor: pointer;
       transition: background-color 0.2s ease;
+    }
+
+    /* Responsive font sizes for filter modal */
+    @media screen and (max-width: 768px) {
+      .filter-modal {
+        width: 180px;
+        padding: 12px;
+      }
+      
+      .filter-modal h2 {
+        font-size: 14px;
+        margin: 0 0 15px;
+      }
+      
+      .filter-group label {
+        font-size: 12px;
+        margin-bottom: 3px;
+      }
+      
+      .filter-group select,
+      .filter-group input {
+        font-size: 12px;
+        padding: 5px 7px;
+      }
+      
+      .filter-group input::placeholder {
+        font-size: 11px;
+      }
+      
+      .filter-actions button {
+        font-size: 12px;
+        padding: 5px 8px;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .filter-modal {
+        width: 160px;
+        padding: 10px;
+      }
+      
+      .filter-modal h2 {
+        font-size: 13px;
+        margin: 0 0 12px;
+      }
+      
+      .filter-group label {
+        font-size: 11px;
+      }
+      
+      .filter-group select,
+      .filter-group input {
+        font-size: 11px;
+        padding: 4px 6px;
+      }
+      
+      .filter-group input::placeholder {
+        font-size: 10px;
+      }
+      
+      .filter-actions button {
+        font-size: 11px;
+        padding: 4px 7px;
+      }
     }
     
     .apply-filters {
@@ -156,8 +220,8 @@
     }
     
     /* Popup styling */
-    .popup-content { font-size: 14px; line-height: 1.5; color: #333; max-width: 260px; }
-    .popup-content h3 { margin: 0 0 8px; color: #008000; font-size: 16px; font-weight: 500; }
+    .popup-content { font-size: var(--font-size-sm); line-height: 1.5; color: #333; max-width: 260px; }
+    .popup-content h3 { margin: 0 0 8px; color: #008000; font-size: var(--font-size-md); font-weight: 500; }
     .popup-content p { margin: 4px 0; }
     .leaflet-popup-content-wrapper {
       border-radius: 8px;
@@ -188,16 +252,18 @@
     .marker-cluster-small, 
     .marker-cluster-medium, 
     .marker-cluster-large {
-      background-color: rgba(0, 128, 0, 0.2);
+      background-color: rgba(0, 128, 0, 0.2) !important;
     }
     .marker-cluster-small div, 
     .marker-cluster-medium div, 
     .marker-cluster-large div {
-      background-color: rgba(0, 128, 0, 0.6);
-      color: white;
+      background-color: rgba(0, 128, 0, 0.6) !important;
+      color: white !important;
     }
 
     .marker-cluster {
+      background-clip: padding-box;
+      border-radius: 29px !important;
       width: 58px !important;
       height: 58px !important;
       margin-left: -29px !important;
@@ -212,6 +278,21 @@
       border-radius: 36px !important;
       font-size: 14px !important;
       line-height: 48px !important;
+      font-weight: bold;
+    }
+
+    /* Additional override to ensure no yellow clusters */
+    .marker-cluster-medium {
+      background-color: rgba(0, 128, 0, 0.2) !important;
+    }
+    .marker-cluster-medium div {
+      background-color: rgba(0, 128, 0, 0.6) !important;
+    }
+    .marker-cluster-large {
+      background-color: rgba(0, 128, 0, 0.2) !important;
+    }
+    .marker-cluster-large div {
+      background-color: rgba(0, 128, 0, 0.6) !important;
     }
   </style>
 </head>
@@ -225,7 +306,6 @@
   <!-- Search button -->
   <button class="search-button" onclick="toggleFilterModal()">
     <i class="fas fa-search"></i>
-    Search Transactions
   </button>
   
   <!-- Filter modal -->
@@ -266,7 +346,46 @@
   <script>
     // Global variables
     var map, markersCluster, allMarkers = [], transactions = [];
-    var initialView = { center: [30, 10], zoom: 2.4 };  // More zoomed in view with adjusted center
+    
+    // Function to get minimum zoom based on screen width
+    function getMinZoom() {
+        const width = window.innerWidth;
+        if (width <= 480) return 0.5;  // Mobile phones
+        if (width <= 768) return 1.5;  // Small tablets
+        if (width <= 1024) return 1.5;  // Large tablets/small laptops
+        return 1.5;  // Desktop
+    }
+
+    // Function to get initial view based on screen size
+    function getInitialView() {
+        const width = window.innerWidth;
+        
+        // Use the same zoom levels as getMinZoom for consistency
+        if (width <= 480) {
+            return { 
+                center: [10, 0],
+                zoom: getMinZoom()  // Mobile phones
+            };
+        }
+        else if (width <= 768) {
+            return {
+                center: [15, 0],
+                zoom: getMinZoom()  // Small tablets
+            };
+        }
+        else if (width <= 1024) {
+            return {
+                center: [20, 0],
+                zoom: getMinZoom()  // Large tablets/small laptops
+            };
+        }
+        return { 
+            center: [30, 0],
+            zoom: getMinZoom()  // Desktop
+        };
+    }
+
+    var initialView = getInitialView();
 
     // Define sector-subsector relationships
     var sectorSubsectorMap = {
@@ -291,9 +410,11 @@
       center: initialView.center, 
       zoom: initialView.zoom, 
       layers: [lightLayer],
-      maxBounds: [[-50, -180], [75, 180]],  // Wider bounds to allow proper navigation to all projects
-      minZoom: 2,  // Prevent zooming out too far
-      maxBoundsViscosity: 0.8  // Make the bounds less rigid to allow proper navigation
+      maxBounds: [[-90, -180], [90, 180]],  // Full globe bounds
+      minZoom: getMinZoom(),  // Dynamic min zoom based on screen size
+      maxBoundsViscosity: 0.8,
+      zoomSnap: 0.25,  // Allow fractional zoom levels in 0.25 increments
+      zoomDelta: 0.25  // Mouse wheel zoom changes in 0.25 increments
     });
 
     // Custom control: Reset view
@@ -302,11 +423,19 @@
       var div = L.DomUtil.create('div', 'custom-control');
       div.innerHTML = 'Reset View';
       div.onclick = function() {
-        map.setView(initialView.center, initialView.zoom);
+        var newView = getInitialView();
+        map.setView(newView.center, newView.zoom);
       };
       return div;
     };
     resetControl.addTo(map);
+
+    // Update view settings when window is resized
+    window.addEventListener('resize', function() {
+        map.setMinZoom(getMinZoom());
+        var newView = getInitialView();
+        map.setView(newView.center, newView.zoom);
+    });
 
     // Initialize MarkerCluster group
     markersCluster = L.markerClusterGroup({
@@ -470,7 +599,6 @@ Infrastructure,Water,39.7684,-86.1581,Indiana Finance Authority State Revolving 
 Advanced Fossil,Advanced Fossil,37.982092,-87.023392,Indiana Gasification,"$2.65 billion integrated coal gasification and substitute natural gas (SNG) production project, with enhanced oil recovery CO2 capture/sequestration."
 Conventional Power,Conventional Power,37.9,27.13623,InterGen-Enka Power,"$2.2 billion financing of 3,850 MW of gas-fired, combined cycle power projects, sponsored by Intergen and Enka."
 Infrastructure,Transportation,39.7,-105,I-70 East,Advising the Build America Bureauon the improvement of the I-70 East corridor in Denver. Public-private partnership under which the selected developer will be responsible for the implementation on a Design-Build-Finance-Operate-Maintain (DBFOM) basis.
-Infrastructure,Transportation,39.7,-105,I-70 East,Advising the Build America Bureauon the improvement of the I-70 East corridor in Denver. Public-private partnership under which the selected developer will be responsible for the implementation on a Design-Build-Finance-Operate-Maintain (DBFOM) basis.
 Satellites & Telecom,Satellites & Telecom,39.533053,-76.63707,Iridium NEXT,"Iridium is building a second generation of its low earth orbit constellation, which provides telecommunications and data coverage to every point on Earth.  "
 Oil & Gas,Pipelines,31.774878,34.980469,Israel Electric Corporation Gas System,$250 million natural gas transmission project sponsored by the Israel Electric Corporation (IEC).
 Renewables,Solar,35.566305,-115.475235,Ivanpah Solar Energy Generating System,"370 MW, three plant, solar thermal tower generation"
@@ -568,6 +696,7 @@ Renewables,Biofuels & Biomass,47.5061125,-111.3044616,Montana Advanced Biofuels,
             markersCluster.addLayer(marker);
           }
         });
+        map.setView(initialView.center, initialView.zoom);
         document.getElementById("loading").style.display = "none";
       },
       error: function(err) {
