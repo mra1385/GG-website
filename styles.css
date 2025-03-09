@@ -920,13 +920,18 @@ footer p {
     
     .expertise-areas {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
         gap: 1.5rem;
     }
     
     .expertise-item {
         width: 100%;
         margin: 0;
+    }
+    
+    /* Keep other expertise areas in their original layout */
+    .expertise-areas:not(#what-we-do .expertise-areas) {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
