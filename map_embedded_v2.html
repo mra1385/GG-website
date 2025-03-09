@@ -46,7 +46,7 @@
       position: fixed;
       bottom: 30px;
       left: 30px;
-      background: #008000;
+      background: #4CAF50;
       color: white;
       padding: 12px 24px;
       border-radius: 25px;
@@ -63,7 +63,7 @@
     }
     
     .search-button:hover {
-      background: #006700;
+      background: #45a049;
       transform: translateY(-2px);
       box-shadow: 0 4px 15px rgba(0,0,0,0.25);
     }
@@ -74,11 +74,11 @@
       bottom: -100%;
       left: 30px;
       background: white;
-      width: 300px;
+      width: 200px;
       border-radius: 12px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.15);
       z-index: 999;
-      padding: 20px;
+      padding: 15px;
       transition: all 0.3s ease;
       opacity: 0;
     }
@@ -96,69 +96,63 @@
     }
     
     .filter-group {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
     
     .filter-group label {
       display: block;
-      margin-bottom: 8px;
-      color: #666;
-      font-size: 14px;
-      font-weight: 500;
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+      color: #333;
     }
     
     .filter-group select,
     .filter-group input {
-      width: 100%;
-      padding: 10px;
+      width: calc(100% - 18px);
+      padding: 6px 8px;
       border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
-      color: #333;
-      background: #f8f8f8;
-      transition: all 0.3s ease;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      box-sizing: border-box;
     }
     
-    .filter-group select:focus,
-    .filter-group input:focus {
-      outline: none;
-      border-color: #008000;
-      background: white;
+    .filter-group input::placeholder {
+      font-size: 0.8rem;
+      color: #999;
     }
     
     .filter-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 20px;
+      gap: 6px;
+      margin-top: 12px;
     }
     
     .filter-actions button {
       flex: 1;
-      padding: 10px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
       border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 500;
+      border-radius: 4px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: background-color 0.2s ease;
     }
     
     .apply-filters {
-      background: #008000;
+      background-color: #4CAF50;
       color: white;
     }
     
     .apply-filters:hover {
-      background: #006700;
+      background-color: #45a049;
     }
     
     .reset-filters {
-      background: #f0f0f0;
+      background-color: #f1f1f1;
       color: #666;
     }
     
     .reset-filters:hover {
-      background: #e0e0e0;
+      background-color: #e5e5e5;
     }
     
     /* Popup styling */
@@ -236,7 +230,6 @@
   
   <!-- Filter modal -->
   <div class="filter-modal" id="filterModal">
-    <h2>Filter Transactions</h2>
     <div class="filter-group">
     <label for="sectorFilter">Sector</label>
     <select id="sectorFilter">
