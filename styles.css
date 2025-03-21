@@ -19,6 +19,12 @@ body {
     width: 100%;
     min-height: 100vh;
     transition: all 0.4s ease;
+    background-color: #ffffff;
+}
+
+/* Remove the background container */
+.background-container {
+    display: none;
 }
 
 .site-wrapper.news-active {
@@ -155,46 +161,100 @@ body {
     justify-content: center;
     align-items: center;
     transition: all 0.5s ease-out;
+    padding-top: 60px;
+    opacity: 1;
+    transform: none;
+    background-color: transparent;
+    z-index: 1;
+}
+
+/* Specific section adjustments */
+#about.section,
+#what-we-do.section,
+#transactions.section,
+#team.section,
+#contact.section {
+    padding-top: 60px;
+}
+
+/* Background sections between content sections */
+.background-section {
+    height: 100vh;
+    width: 100%;
+    position: relative;
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    padding-top: 80px;
-    opacity: 1;
-    transform: none;
+    display: block;
+    overflow: visible;
+    z-index: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ensure consistent spacing between sections */
+.section + .background-section,
+.background-section + .section {
+    margin: 0; /* Remove any margin between sections and background sections */
+}
+
+/* Background images for each section */
+.background-section:nth-of-type(1) {
+    background-image: url('assets/images/background-power.avif');
+}
+
+.background-section:nth-of-type(2) {
+    background-image: url('assets/images/background-lng.avif');
+}
+
+.background-section:nth-of-type(3) {
+    background-image: url('assets/images/background-nuclear.avif');
+}
+
+.background-section:nth-of-type(4) {
+    background-image: url('assets/images/background-moresolar.avif');
+}
+
+.background-section:nth-of-type(5) {
+    background-image: url('assets/images/background-power.avif');
+    z-index: 0;
+    position: relative;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.background-section:nth-of-type(6) {
+    background-image: url('assets/images/background-moresolar.avif');
+}
+
+/* Remove background images from content sections */
+#home, #about, #what-we-do, #transactions, #team, #contact {
+    background-image: none;
+    background-color: transparent;
 }
 
 /* Every even section with subtle background */
 #about, #team {
-    background-color: #f8f9fa;
+    background-color: transparent;
 }
 
-/* Section backgrounds with subtle parallax */
-#home {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('assets/images/background-solarpv.avif');
-    background-position: center 20%;
+/* Add a window-like effect to sections */
+.section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    z-index: -1;
 }
 
-#about {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('assets/images/background-power.avif');
-    background-position: center 30%;
-}
-
-#what-we-do {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('assets/images/background-solarpv.avif');
-    background-position: center 40%;
-}
-
-#transactions {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('assets/images/background-lng.avif');
-}
-
-#team {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('assets/images/background-road.avif');
-    background-position: center 40%;
-}
-
-#contact {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('assets/images/background-refinery.avif');
+/* Ensure content stays above the background */
+.section > * {
+    position: relative;
+    z-index: 2;
 }
 
 /* Fade-in animation for sections */
@@ -215,7 +275,7 @@ body {
     transform: translateY(0);
 }
 
-/* Container styling */
+/* Container standardization */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -245,6 +305,7 @@ body {
 .container h2 {
     font-size: var(--font-size-xxl);
     font-weight: 600;
+    margin-top: 0;
     margin-bottom: 1.5rem;
     position: relative;
     display: inline-block;
@@ -277,6 +338,35 @@ body {
     opacity: 0;
     transition: all 0.5s ease;
     width: 90%;
+}
+
+/* Add background image to home section */
+#home.section {
+    background-image: url('assets/images/background-solarpv.avif');
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+    position: relative;
+    padding-top: 0;
+    margin-top: 80px;
+}
+
+/* Add white overlay to home section */
+#home.section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.85);
+    z-index: 1;
+}
+
+/* Ensure hero content stays above the overlay */
+#home .hero {
+    position: relative;
+    z-index: 2;
 }
 
 .section.visible .hero {
@@ -410,6 +500,16 @@ body {
 }
 
 /* Team section */
+#team.section {
+    padding-top: 60px;
+    min-height: auto;
+    margin-bottom: 0;
+}
+
+#team .container {
+    padding-top: 2rem;
+}
+
 #team .container h2 {
     margin-bottom: 0.5rem;
 }
@@ -479,6 +579,18 @@ body {
 }
 
 /* Contact section */
+#contact.section {
+    padding-top: 60px;
+    margin-bottom: 0;
+    padding-bottom: 2rem; /* Add more bottom padding */
+    min-height: auto;
+}
+
+#contact .container {
+    padding-top: 2rem;
+    padding-bottom: 2rem; /* Add more container padding */
+}
+
 .contact-content {
     display: grid;
     grid-template-columns: 1fr;
@@ -505,32 +617,38 @@ body {
     align-items: center;
     text-align: center;
     padding: 1.5rem;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: #ffffff;
     border-radius: 8px;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    min-height: 170px;
+    height: auto;
+    overflow: auto;
 }
 
 .contact-item:hover {
     transform: translateY(-5px);
-    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
 }
 
 .contact-item i {
     color: #4CAF50;
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.9rem;
+    margin-bottom: 0.35rem;
 }
 
 .contact-item h3 {
     color: #333;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin: 0.5rem 0;
 }
 
 .contact-item p {
     color: #555;
-    line-height: 1.6;
+    line-height: 1.5;
+    font-size: 0.85rem;
+    margin: 0;
 }
 
 .contact-item a {
@@ -1190,15 +1308,27 @@ html {
 
 /* Hero section specific adjustment */
 #home.section {
-    padding-top: 0; /* Remove padding for hero section */
-    margin-top: 80px; /* Add margin instead for hero section */
+    padding-top: 0;
+    margin-top: 80px;
 }
 
 /* Simple copyright line */
 .copyright {
     text-align: center;
-    padding: 0.35rem 0 0.6rem;
-    margin-top: 0.5rem;
+    padding: 0.25rem 0 0.4rem; /* Reduce padding */
+    margin-top: 0; /* Remove top margin */
+    position: relative;
+}
+
+.copyright::before {
+    content: '';
+    position: absolute;
+    top: -0.15rem; /* Reduce space above the line */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 1px;
+    background-color: rgba(76, 175, 80, 0.2);
 }
 
 .copyright p {
@@ -1294,7 +1424,7 @@ html {
 
 /* Critical mobile fix - ensures sections are visible on all devices */
 .section {
-    opacity: 1 !important; /* Force visibility */
+    opacity: 1 !important;
 }
 
 /* Ensure content is visible on mobile */
@@ -1328,4 +1458,37 @@ html {
     #what-we-do .expertise-item {
         padding: 1.5rem;
     }
+}
+
+/* Ensure main content area has proper stacking */
+main {
+    position: relative;
+    z-index: 0;
+    overflow: visible;
+}
+
+/* Fix for the background section after team */
+.background-section:nth-of-type(5) {
+    height: 100vh;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 0;
+    position: relative;
+    overflow: visible;
+}
+
+/* Specific styling for the background between team and contact */
+.team-contact-background {
+    background-image: url('assets/images/background-power.avif') !important;
+    height: 100vh !important;
+    width: 100% !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 0 !important;
+    position: relative !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
 } 
